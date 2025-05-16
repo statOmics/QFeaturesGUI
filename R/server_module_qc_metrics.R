@@ -9,7 +9,8 @@
 #' @importFrom shiny moduleServer updateSelectInput observeEvent eventReactive is.reactive
 #' @importFrom MultiAssayExperiment getWithColData
 #'
-server_module_qc_metrics <- function(id, assays_to_process, type) {
+server_module_qc_metrics <- function(id, assays_to_process#, type
+                                     ) {
     stopifnot(is.reactive(assays_to_process))
     moduleServer(id, function(input, output, session) {
         assays_choices_vector <- reactive({
@@ -37,17 +38,17 @@ server_module_qc_metrics <- function(id, assays_to_process, type) {
             )
         })
 
-        server_module_pca_box(
-            id = "features",
-            single_assay = single_assay,
-            method = input$selected_method,
-            transpose = FALSE
-        )
+        # server_module_pca_box(
+        #     id = "features",
+        #     single_assay = single_assay,
+        #     method = input$selected_method,
+        #     transpose = FALSE
+        # )
         server_module_pca_box(
             id = "samples",
             single_assay = single_assay,
             method = input$selected_method,
-            transpose = TRUE
+            transpose = FALSE
         )
 
         server_module_viz_box("viz_box", assays_to_process)
@@ -73,15 +74,15 @@ server_module_qc_metrics <- function(id, assays_to_process, type) {
 #' @importFrom methods is
 #'
 server_module_pca_box <- function(id, single_assay, method, transpose) {
-    moduleServer(id, function(input, output, session) {
-        annotation_names <- reactive({
-            req(single_assay())
-            if (id == "features") {
-                colnames(rowData(single_assay()))
-            } else {
-                colnames(colData(single_assay()))
-            }
-        })
+   moduleServer(id, function(input, output, session) {
+       annotation_names <- reactive({
+           req(single_assay())
+           if (id == "features") {
+               colnames(rowData(single_assay()))
+           } else {
+               colnames(colData(single_assay()))
+           }
+       })
 
         observe({
             req(single_assay())
@@ -125,6 +126,7 @@ server_module_pca_box <- function(id, single_assay, method, transpose) {
                 center = input$center
             )
         })
+
         dataframe <- reactive({
             req(pca_result())
             req(color_data())

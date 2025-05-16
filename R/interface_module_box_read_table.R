@@ -21,7 +21,7 @@ box_read_table_ui <- function(id) {
             fileInput(
                 inputId = NS(id, "file"),
                 label = NULL,
-                accept = c(".csv", ".tsv")
+                accept = c(".csv", ".tsv",".txt")
             ),
             fluidRow(
                 box(
@@ -42,18 +42,18 @@ box_read_table_ui <- function(id) {
                     textInput(
                         inputId = NS(id, "sep"),
                         label = "Separator character",
-                        value = ","
+                        value = "auto"
                     ),
                     textInput(
                         inputId = NS(id, "dec"),
                         label = "Decimal character",
-                        value = "."
+                        value = "auto"
                     ),
-                    textInput(
-                        inputId = NS(id, "comment_char"),
-                        label = "Comment character",
-                        value = "#"
-                    ),
+ #                   textInput(
+ #                       inputId = NS(id, "comment_char"),
+ #                       label = "Comment character",
+ #                       value = "#"
+ #                   ),
                     numericInput(
                         inputId = NS(id, "skip"),
                         label = "Number of line to skip before reading data",

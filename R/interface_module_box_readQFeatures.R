@@ -36,8 +36,9 @@ box_readqfeatures_ui <- function(id) {
                 ),
                 selectInput(
                     inputId = NS(id, "run_col"),
-                    "Run/Batch column :",
-                    choices = NULL
+                    "Run/Batch column : (leave blank when input table is in wide format)",
+                    choices = NULL,
+                    multiple = TRUE
                 ),
                 selectInput(
                     inputId = NS(id, "quant_cols"),

@@ -8,10 +8,13 @@
 #' @rdname INTERNAL_box_readqfeatures_server
 #' @keywords internal
 #'
+#' @importFrom data.table fread
 #' @importFrom shiny is.reactive reactive moduleServer observe eventReactive updateSelectInput removeModal downloadHandler
 #' @importFrom DT renderDataTable datatable
 #' @importFrom QFeatures readQFeatures
 #' @importFrom QFeatures zeroIsNA
+#' @importFrom QFeatures nNA
+
 #' @importFrom methods as
 #' @import SingleCellExperiment
 #' @import SummarizedExperiment
@@ -55,6 +58,9 @@ box_readqfeatures_server <- function(id, input_table, sample_table) {
                     object = global_rv$qfeatures,
                     i = seq_along(global_rv$qfeatures)
                 )
+
+                for (i in seq_along(global_rv$qfeatures))
+                    rowData(global_rv$qfeatures[[i]])[,c("pNA", "nNA")] <- nNA(global_rv$qfeatures, i)$nNArows[, c("pNA", "nNA")]
             }
             if (input$singlecell) {
                 el <- ExperimentList(lapply(

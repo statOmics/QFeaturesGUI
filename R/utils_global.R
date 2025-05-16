@@ -216,6 +216,7 @@ pcaMethods_wrapper <- function(sce, method, center, scale, transpose = FALSE) {
         method = method,
         center = center
     )
+    cat("pca ok")
     pca
 }
 
@@ -323,7 +324,7 @@ pca_plotly <- function(df, pca_result, color_name, show_legend) {
 #' @return (NULL) does not return anything but will add the assays to the global_rv qfeatures object
 #' @importFrom QFeatures addAssayLink
 
-add_assays_to_global_rv <- function(processed_qfeatures, step_number, type) {
+add_assays_to_global_rv <- function(processed_qfeatures, step_number, type, varFrom = NULL, varTo = NULL) {
     for (name in names(processed_qfeatures)) {
         new_name <- paste0(
             strsplit(name, "_(QFeaturesGUI#", fixed = TRUE)[[1]][[1]],
@@ -333,11 +334,19 @@ add_assays_to_global_rv <- function(processed_qfeatures, step_number, type) {
 
         global_rv$qfeatures[[new_name]] <- processed_qfeatures[[name]]
 
-        global_rv$qfeatures <- addAssayLink(
-            global_rv$qfeatures,
-            from = name,
-            to = new_name
-        )
+        if (is.null(varFrom)|is.null(varTo))
+            global_rv$qfeatures <- addAssayLink(
+                global_rv$qfeatures,
+                from = name,
+                to = new_name,
+        ) else
+            global_rv$qfeatures <- addAssayLink(
+                global_rv$qfeatures,
+                from = name,
+                to = new_name,
+                varFrom = varFrom,
+                varTo = varTo,
+            )
     }
 }
 
@@ -383,6 +392,40 @@ normalisation_qfeatures <- function(qfeatures, method) {
         )
     })
     names(el) <- names(qfeatures)
+    QFeatures(el, colData = colData(qfeatures))
+}
+
+
+#' A function that will aggregate all the assays of a qfeatures
+#'
+#' @param qfeatures `QFeatures` object to aggregate
+#' @param fun `str` A function used for quantitative feature aggregation.
+#' @param fcol A character string naming a rowdata variable defining how to aggregate the features of the assay. This variable is either a character or a (possibly sparse) matrix.
+#' @return `QFeatures` object with the normalised assays
+#' @rdname INTERNAL_aggregation_qfeatures
+#' @keywords internal
+#' @importFrom QFeatures normalize QFeatures
+#' @importFrom SummarizedExperiment colData
+
+aggregation_qfeatures <- function(qfeatures, method,
+                                  fcol) {
+    el <- lapply(names(qfeatures), function(name) {
+        QFeatures::aggregateFeatures(
+            object = qfeatures[[name]],
+#            fun = base::colMeans,
+           fun = list(
+               robustSummary = MsCoreUtils::robustSummary,
+               medianPolish = MsCoreUtils::medianPolish,
+               colMeans = base::colMeans,
+                colMedians = matrixStats::colMedians,
+               colSums = base::colSums)[[method]],
+            fcol = fcol,
+            na.rm = TRUE
+        )
+    })
+    cat("ok\n")
+    names(el) <- names(qfeatures)
+    cat("dok\n")
     QFeatures(el, colData = colData(qfeatures))
 }
 

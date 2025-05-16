@@ -24,16 +24,16 @@ box_read_table_server <- function(id, given_table = NULL) {
                 req(input$file)
                 loading("Be aware that this operation can be quite time consuming for large data sets")
                 new_table <- error_handler(
-                    read.table,
+                    fread,
                     component_name = paste0("read.table ", id),
                     input$file$datapath,
                     sep = input$sep,
                     dec = input$dec,
-                    skip = input$skip,
+                    #skip = input$skip,
                     stringsAsFactors = input$stringsAsFactors,
-                    comment.char = input$comment_char,
-                    header = TRUE,
-                    row.names = 1
+                    #comment.char = input$comment_char,
+                    #header = TRUE,
+                    #row.names = 1
                 )
                 removeModal()
                 table(new_table)
