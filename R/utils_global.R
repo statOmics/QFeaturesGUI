@@ -213,8 +213,8 @@ pcaMethods_wrapper <- function(sce, method, center, scale, transpose = FALSE) {
         mat <- t(mat)
     }
     pca <- pcaMethods::pca(mat,
-        method = method,
-        center = center
+                           method = method,
+                           center = center
     )
     cat("pca ok")
     pca
@@ -254,25 +254,25 @@ page_assays_subset <- function(qfeatures, pattern) {
 pca_plotly <- function(df, pca_result, color_name, show_legend) {
     stopifnot(is.data.frame(df))
     plotly <- plot_ly(df,
-        x = ~PC1,
-        y = ~PC2,
-        color = as.formula(paste0("~", color_name)),
-        text = ~Row.names,
-        type = "scatter",
-        mode = "markers",
-        colors = if (is.numeric(df[[color_name]])) {
-            viridisLite::viridis(10)
-        } else {
-            suppressWarnings(RColorBrewer::brewer.pal(
-                length(unique(df[[color_name]])),
-                "Set1"
-            ))
-        },
-        hovertemplate = paste(
-            "%{text}<br>",
-            paste0(color_name, ": %{customdata}<extra></extra>")
-        ),
-        customdata = as.formula(paste0("~", color_name))
+                      x = ~PC1,
+                      y = ~PC2,
+                      color = as.formula(paste0("~", color_name)),
+                      text = ~Row.names,
+                      type = "scatter",
+                      mode = "markers",
+                      colors = if (is.numeric(df[[color_name]])) {
+                          viridisLite::viridis(10)
+                      } else {
+                          suppressWarnings(RColorBrewer::brewer.pal(
+                              length(unique(df[[color_name]])),
+                              "Set1"
+                          ))
+                      },
+                      hovertemplate = paste(
+                          "%{text}<br>",
+                          paste0(color_name, ": %{customdata}<extra></extra>")
+                      ),
+                      customdata = as.formula(paste0("~", color_name))
     ) %>%
         layout(
             xaxis = list(title = paste(
@@ -414,13 +414,13 @@ aggregation_qfeatures <- function(qfeatures, method,
     el <- lapply(names(qfeatures), function(name) {
         QFeatures::aggregateFeatures(
             object = qfeatures[[name]],
-#            fun = base::colMeans,
-           fun = list(
-               robustSummary = MsCoreUtils::robustSummary,
-               medianPolish = MsCoreUtils::medianPolish,
-               colMeans = base::colMeans,
+            #            fun = base::colMeans,
+            fun = list(
+                robustSummary = MsCoreUtils::robustSummary,
+                medianPolish = MsCoreUtils::medianPolish,
+                colMeans = base::colMeans,
                 colMedians = matrixStats::colMedians,
-               colSums = base::colSums)[[method]],
+                colSums = base::colSums)[[method]],
             fcol = fcol,
             na.rm = TRUE
         )
@@ -585,12 +585,12 @@ plotlyridges <- function(
     for (i in rev(1:length(catnames))) {
         p <- plotly::add_trace(p, x = x[[i]], y = i, line = list(color = linecolor, width = linewidth), showlegend = FALSE, hoverinfo = "none")
         p <- plotly::add_trace(p,
-            x = x[[i]], y = y[[i]] + i, fill = "tonexty", fillcolor = fillcolor, line = list(color = linecolor, width = linewidth), showlegend = FALSE, name = catnames[i], hoverinfo = "text", text = text[i]
+                               x = x[[i]], y = y[[i]] + i, fill = "tonexty", fillcolor = fillcolor, line = list(color = linecolor, width = linewidth), showlegend = FALSE, name = catnames[i], hoverinfo = "text", text = text[i]
         )
 
         p <- plotly::layout(p,
-            yaxis = list(tickmode = "array", tickvals = (1:length(catnames)), ticktext = catnames, showline = TRUE),
-            xaxis = xaxis
+                            yaxis = list(tickmode = "array", tickvals = (1:length(catnames)), ticktext = catnames, showline = TRUE),
+                            xaxis = xaxis
         )
     }
     p
@@ -613,6 +613,7 @@ plotlyridges <- function(
 summarize_assays_to_df <- function(qfeatures, sample_column, feature_column = NULL) {
 
     combined_df <- data.frame(PSM = character(), intensity = numeric(), sample = character())
+    if (sample_column == "") return(combined_df)
     for (assayName in names(qfeatures)) {
         assayData <- as.data.frame(assay(qfeatures[[assayName]]))
 
@@ -620,7 +621,6 @@ summarize_assays_to_df <- function(qfeatures, sample_column, feature_column = NU
         assayData$PSM <- rownames(assayData)
 
         matched_indices <- match(assayData$sample, rownames(colData(qfeatures)))
-        length(matched_indices)
         assayData$sample_type <- colData(qfeatures)[matched_indices, sample_column]
 
         if (!is.null(feature_column)) {
@@ -645,14 +645,17 @@ summarize_assays_to_df <- function(qfeatures, sample_column, feature_column = NU
 #'
 
 features_boxplot <- function(assays_df) {
-    plot <- ggplot(assays_df, aes(
-        x = sample_type,
-        y = intensity,
-        colour = sample_type,
-        fill = sample_type
-    )) +
-        geom_violin(aes(alpha = 0.5))
-
+    if (nrow(assays_df) > 0) {
+        plot <- ggplot(assays_df, aes(
+            x = sample_type,
+            y = intensity,
+            colour = sample_type,
+            fill = sample_type
+        )) +
+            geom_violin(aes(alpha = 0.5))
+    } else {
+        plot <- ggplot()
+    }
     suppressWarnings(ggplotly(plot))
 }
 
