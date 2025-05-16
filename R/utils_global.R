@@ -334,19 +334,21 @@ add_assays_to_global_rv <- function(processed_qfeatures, step_number, type, varF
 
         global_rv$qfeatures[[new_name]] <- processed_qfeatures[[name]]
 
-        if (is.null(varFrom)|is.null(varTo))
+        if (is.null(varFrom) || is.null(varTo)) {
             global_rv$qfeatures <- addAssayLink(
                 global_rv$qfeatures,
                 from = name,
-                to = new_name,
-        ) else
+                to = new_name
+            )
+        } else {
             global_rv$qfeatures <- addAssayLink(
                 global_rv$qfeatures,
                 from = name,
                 to = new_name,
                 varFrom = varFrom,
-                varTo = varTo,
+                varTo = varTo
             )
+        }
     }
 }
 
@@ -423,9 +425,7 @@ aggregation_qfeatures <- function(qfeatures, method,
             na.rm = TRUE
         )
     })
-    cat("ok\n")
     names(el) <- names(qfeatures)
-    cat("dok\n")
     QFeatures(el, colData = colData(qfeatures))
 }
 
