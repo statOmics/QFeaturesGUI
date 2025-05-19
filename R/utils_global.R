@@ -493,7 +493,7 @@ density_by_sample_plotly <- function(qfeatures, color) {
 #' @importFrom plotly plot_ly add_trace layout
 #'
 plotlyridges <- function(
-        data, vardens, varcat, linecolor = "darkblue", fillcolor = "steelblue", fillopacity = 0.6, linewidth = 0.5, scale = 0.9, logspaced = FALSE, cut.from = 0, cut.to = 3, n = 512, bw = NULL, bw.separate = FALSE, height.norm = "integral", round.digits = 2, x.min = 0,
+        data, vardens, varcat, linecolor = "darkblue", fillcolor = "steelblue", fillopacity = 0.6, linewidth = 0.5, scale = 0.9, logspaced = FALSE, cut.from = 0, cut.to = 3, n = 512, bw = NULL, bw.separate = FALSE, height.norm = "integral", round.digits = 2, x.min = NULL,
         height = NULL,
         width = NULL) {
     data <- subset(data, !is.na(data[, vardens]))
