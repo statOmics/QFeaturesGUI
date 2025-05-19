@@ -49,39 +49,32 @@ server_module_filtering_box <- function(id, assays_to_process, type, state) {
                 )
             })
         }
-
-
-        annotations_type <- reactive({
+        annotation_values <- reactive({
             req(input$annotation_selection)
             req(assays_to_process())
             if (type == "samples") {
-                typeof(colData(assays_to_process())[[input$annotation_selection]])
+                colData(assays_to_process())[[input$annotation_selection]]
             } else if (type == "features") {
-                typeof(rowData(assays_to_process()[[1]])[[input$annotation_selection]])
+                rowData(assays_to_process()[[1]])[[input$annotation_selection]]
             }
         })
         clean_filter_value <- reactive({
-            req(annotations_type())
-            num_val <- suppressWarnings(as.numeric(input$filter_value))
-            num <- (annotations_type() == "numeric" | annotations_type() == "integer") && !is.na(num_val)
-            char <- (annotations_type() == "character" | annotations_type() == "factor")
-
+            req(annotation_values())
+            is_num <- is.numeric(annotation_values())
+            filter_value <- input$filter_value
+            if (is_num) filter_value <- suppressWarnings(as.numeric(filter_value))
             feedbackDanger("filter_value",
-                show = !(num | char),
+                show = is_num && is.na(filter_value),
                 paste0(
                     "The type of the filter value should",
                     " coincide with the type of the annotation.",
                     "<br>",
-                    "Annotation type: ", annotations_type(),
+                    "Annotation type: ", class(annotation_values()),
                     "<br>",
-                    "Filter type: ", typeof(input$filter_value)
+                    "Filter type: ", class(input$filter_value)
                 )
             )
-            if (num) {
-                return(num_val)
-            } else {
-                return(input$filter_value)
-            }
+            filter_value
         })
         server_module_annotation_plot(
             "annotation_plot",
