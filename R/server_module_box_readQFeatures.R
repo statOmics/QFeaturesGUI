@@ -30,27 +30,20 @@ box_readqfeatures_server <- function(id, input_table, sample_table) {
                 "can be quite time consuming for large data sets",
                 sep = " "
             ))
-            if (is.data.frame(sample_table())) {
-                global_rv$qfeatures <- error_handler(
-                    QFeatures::readQFeatures,
-                    component_name = "QFeatures converting (readQFeatures)",
-                    assayData = input_table(),
-                    colData = sample_table(),
-                    runCol = input$run_col,
-                    removeEmptyCols = input$removeEmptyCols,
-                    verbose = FALSE
-                )
-            } else {
-                global_rv$qfeatures <- error_handler(
-                    QFeatures::readQFeatures,
-                    component_name = "QFeatures converting (readQFeatures)",
-                    assayData = input_table(),
-                    runCol = input$run_col,
-                    quantCols = input$quant_cols,
-                    removeEmptyCols = input$removeEmptyCols,
-                    verbose = FALSE
-                )
-            }
+            run_col <- input$run_col
+            coldata <- sample_table()
+            if (run_col == "(none)") run_col <- NULL
+            if (!is.data.frame(coldata)) coldata <- NULL
+            global_rv$qfeatures <- error_handler(
+                readQFeatures,
+                component_name = "QFeatures converting (readQFeatures)",
+                assayData = input_table(),
+                colData = coldata,
+                quantCols = input$quant_cols,
+                runCol = run_col,
+                removeEmptyCols = input$removeEmptyCols,
+                verbose = FALSE
+            )
             if (input$zero_as_NA && length(global_rv$qfeatures) > 0) {
                 global_rv$qfeatures <- error_handler(
                     QFeatures::zeroIsNA,
@@ -87,7 +80,7 @@ box_readqfeatures_server <- function(id, input_table, sample_table) {
             input$reload_button
             updateSelectInput(session,
                 "run_col",
-                choices = colnames(input_table())
+                choices = c("(none)", colnames(input_table()))
             )
             updateSelectInput(session,
                 "quant_cols",

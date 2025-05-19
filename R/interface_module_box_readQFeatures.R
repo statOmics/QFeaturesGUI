@@ -36,13 +36,12 @@ box_readqfeatures_ui <- function(id) {
                 ),
                 selectInput(
                     inputId = NS(id, "run_col"),
-                    "Run/Batch column : (leave blank when input table is in wide format)",
-                    choices = NULL,
-                    multiple = TRUE
+                    "Run/Batch column:",
+                    choices = NULL
                 ),
                 selectInput(
                     inputId = NS(id, "quant_cols"),
-                    "Quantitative column : (Only relevant without sample table)",
+                    "Quantitative column: (Only relevant without sample table)",
                     choices = NULL,
                     multiple = TRUE
                 ),

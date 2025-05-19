@@ -216,7 +216,6 @@ pcaMethods_wrapper <- function(sce, method, center, scale, transpose = FALSE) {
                            method = method,
                            center = center
     )
-    cat("pca ok")
     pca
 }
 
@@ -452,9 +451,8 @@ density_by_sample_plotly <- function(qfeatures, color) {
 
         combined_df <- rbind(combined_df, assay_df)
     }
-
-    combined_df$color <- colData(qfeatures)[combined_df$sample, color]
-
+    if (ncol(colData(qfeatures)) > 1)
+        combined_df$color <- colData(qfeatures)[combined_df$sample, color]
     plotlyridges(
         data = combined_df,
         vardens = "intensity",
