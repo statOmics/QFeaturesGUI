@@ -38,12 +38,12 @@ server_module_qc_metrics <- function(id, assays_to_process#, type
             )
         })
 
-        # server_module_pca_box(
-        #     id = "features",
-        #     single_assay = single_assay,
-        #     method = input$selected_method,
-        #     transpose = FALSE
-        # )
+        server_module_pca_box(
+            id = "features",
+            single_assay = single_assay,
+            method = input$selected_method,
+            transpose = FALSE
+        )
         server_module_pca_box(
             id = "samples",
             single_assay = single_assay,
@@ -130,8 +130,13 @@ server_module_pca_box <- function(id, single_assay, method, transpose) {
         dataframe <- reactive({
             req(pca_result())
             req(color_data())
+            if (id == "features") {
+                eigenvectors <- pcaMethods::scores
+            } else {
+                eigenvectors <- pcaMethods::loadings
+            }
             as.data.frame(merge(
-                data.frame(scores(pca_result())),
+                data.frame(eigenvectors(pca_result())),
                 color_data(),
                 by = "row.names"
             ))

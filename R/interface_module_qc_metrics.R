@@ -38,10 +38,10 @@ interface_module_qc_metrics <- function(id, type) {
                     )
                 ),
                 fluidRow(
-                    # interface_module_pca_box(
-                    #     NS(id, "features"),
-                    #     title = "Features PCA"
-                    # ),
+                    interface_module_pca_box(
+                        NS(id, "features"),
+                        title = "Features PCA"
+                    ),
                     interface_module_pca_box(
                         NS(id, "samples"),
                         title = "Samples PCA"
