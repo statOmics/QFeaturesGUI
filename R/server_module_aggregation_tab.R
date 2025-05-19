@@ -48,26 +48,26 @@ server_module_aggregation_tab <- function(id, step_number) {
             )
         })
 
-        # output$density_plot <- renderPlotly({
-        #     req(processed_assays())
-        #     density_by_sample_plotly(
-        #         qfeatures = processed_assays(),
-        #         color = input$color
-        #     )
-        #     # error_handler(
-        #     #     density_by_sample_plotly,
-        #     #     component_name = "Density by sample plotly",
-        #     #     qfeatures = processed_assays(),
-        #     #     color = input$color)
-        # })
-        #
-        # observe({
-        #     req(processed_assays())
-        #     updateSelectInput(session,
-        #         "color",
-        #         choices = colnames(colData(processed_assays()))
-        #     )
-        # })
+        output$density_plot <- renderPlotly({
+            req(processed_assays())
+            density_by_sample_plotly(
+                qfeatures = processed_assays(),
+                color = input$color
+            )
+            # error_handler(
+            #     density_by_sample_plotly,
+            #     component_name = "Density by sample plotly",
+            #     qfeatures = processed_assays(),
+            #     color = input$color)
+        })
+
+        observe({
+            req(processed_assays())
+            updateSelectInput(session,
+                "color",
+                choices = colnames(colData(processed_assays()))
+            )
+        })
 
         observeEvent(input$export, {
             req(processed_assays())

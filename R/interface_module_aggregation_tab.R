@@ -34,17 +34,17 @@ interface_module_aggregation_tab <- function(id) {
             solidHeader = TRUE,
             collapsible = FALSE,
             fluidRow(
-            #     box(
-            #         title = "",
-            #         status = "primary",
-            #         width = 9,
-            #         solidHeader = FALSE,
-            #         collapsible = TRUE,
-            #         withSpinner(plotlyOutput(outputId = NS(id, "density_plot")),
-            #             type = 6,
-            #             color = "#3c8dbc"
-            #         )
-            #     ),
+                box(
+                    title = "",
+                    status = "primary",
+                    width = 9,
+                    solidHeader = FALSE,
+                    collapsible = TRUE,
+                    withSpinner(plotlyOutput(outputId = NS(id, "density_plot")),
+                        type = 6,
+                        color = "#3c8dbc"
+                    )
+                ),
                 box(
                     title = "Settings",
                     status = "primary",
