@@ -68,16 +68,3 @@ server_module_viz_box <- function(id, assays_to_process) {
         })
     })
 }
-
-annotation_cols <- function(x, what) {
-    if (length(x) == 0) {
-        NULL
-    } else {
-        annot <- switch(
-            what,
-            rowData = rowData(x)[[1]],
-            colData = colData(x)
-        )
-        colnames(annot)
-    }
-}
