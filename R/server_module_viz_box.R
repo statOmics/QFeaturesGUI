@@ -16,6 +16,7 @@ server_module_viz_box <- function(id, assays_to_process) {
         unique_features <- reactive({
             req(assays_to_process())
             req(input$feature_type_column)
+            if (!length(assays_to_process())) return(NULL)
             features_list <- lapply(seq_along(assays_to_process()), function(i) {
                 rowData(assays_to_process()[[i]])[, input$feature_type_column]
             })
@@ -36,7 +37,7 @@ server_module_viz_box <- function(id, assays_to_process) {
             req(assays_to_process())
             updateSelectInput(session,
                 "sample_type_column",
-                choices = colnames(colData(assays_to_process()))
+                choices = annotation_cols(assays_to_process(), "colData")
             )
         })
 
@@ -44,7 +45,7 @@ server_module_viz_box <- function(id, assays_to_process) {
             req(assays_to_process())
             updateSelectInput(session,
                 "feature_type_column",
-                choices = colnames(rowData(assays_to_process()[[1]]))
+                choices = annotation_cols(assays_to_process(), "rowData")
             )
         })
 
@@ -66,4 +67,17 @@ server_module_viz_box <- function(id, assays_to_process) {
             unique_feature_boxplot(feature_summary_df(), input$feature)
         })
     })
+}
+
+annotation_cols <- function(x, what) {
+    if (length(x) == 0) {
+        NULL
+    } else {
+        annot <- switch(
+            what,
+            rowData = rowData(x)[[1]],
+            colData = colData(x)
+        )
+        colnames(annot)
+    }
 }

@@ -227,12 +227,23 @@ pcaMethods_wrapper <- function(sce, method, center, scale, transpose = FALSE) {
 #' @keywords internal
 #'
 page_assays_subset <- function(qfeatures, pattern) {
-    to_process <- grepl(
+    to_process <- grep(
         pattern,
         names(qfeatures),
         fixed = TRUE
     )
-    suppressMessages(suppressWarnings(qfeatures[, , to_process]))
+    if (length(qfeatures) > 0 && length(to_process) == 0) {
+        showModal(modalDialog(
+            title = "Step not found",
+            HTML(paste0(
+                "<i>", "The output from the previous step could not ",
+                "be found. Are you sure you have saved the processed ",
+                "data from the previous step?", "</i>"))
+        ))
+        QFeatures()
+    } else {
+        suppressMessages(suppressWarnings(qfeatures[, , to_process]))
+    }
 }
 
 #' Create a plotly PCA plot
@@ -440,6 +451,7 @@ aggregation_qfeatures <- function(qfeatures, method,
 #' @importFrom SummarizedExperiment assay colData
 
 density_by_sample_plotly <- function(qfeatures, color) {
+    if (length(qfeatures) == 0) return(NULL)
     combined_df <- data.frame(intensity = numeric(), sample = character())
     for (assayName in names(qfeatures)) {
         assayData <- assay(qfeatures[[assayName]])
@@ -675,4 +687,32 @@ unique_feature_boxplot <- function(assays_df, feature) {
         geom_boxplot()
 
     suppressWarnings(ggplotly(plot))
+}
+
+#' Internal function that return the available variables (column
+#' names) from the sample annotations (colData) or feature annotations
+#' (rowData) of a QFeatures object. The function is robust against
+#' empty QFeatures objects.
+#'
+#' @param x a QFeatures object
+#' @param what a character(1), either "rowData" or "colData" depending
+#'   on whether to fetch feature annotationes or sample annotations,
+#'   respectively.
+#'
+#' @return a vector of column names or an empty vector if no columns
+#'   are found.
+#'
+#' @rdname INTERNAL_annotation_cols
+#' @keywords internal
+annotation_cols <- function(x, what) {
+    if (length(x) == 0) {
+        character(0)
+    } else {
+        annot <- switch(
+            what,
+            rowData = rowData(x)[[1]],
+            colData = colData(x)
+        )
+        colnames(annot)
+    }
 }

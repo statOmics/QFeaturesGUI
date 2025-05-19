@@ -20,7 +20,7 @@ server_module_aggregation_tab <- function(id, step_number) {
 
         aggregation_names <- reactive({
             req(assays_to_process())
-                colnames(rowData(assays_to_process()[[1]]))
+            annotation_cols(assays_to_process(), "rowData")
         })
 
         observe({
