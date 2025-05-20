@@ -323,27 +323,53 @@ pca_plotly <- function(df, pca_result, color_name, show_legend) {
     return(plotly)
 }
 
+#' Internal function that creates assay names for a QFeatures object,
+#' providing minimal information of the step carried out to generate
+#' the assay(s).
+#'
+#' @param type A `character(1)` providing the name of the step.
+#' @param step_number `int` number of the step
+#' @param prefix An (optional) `character(1)` providing a prefix to
+#'     append at the start of the generated name. This is particularly
+#'     useful when a step is performed on multiple assays at once. Any
+#'     annotations from previous steps is removed from the prefix
+#'
+#' @return A `character(1)` with the generated name.
+#'
+#' @rdname INTERNAL_qfeaturesgui_name
+#' @keywords internal
+#'
+qfeaturesgui_name <- function(type, step_number, prefix = NULL) {
+    out <- paste0(
+        "(QFeaturesGUI#", step_number, ")", "_", type, "_", step_number
+    )
+    if (!is.null(prefix)){
+        ## remove the annotations from previous steps
+        prefix <- strsplit(prefix, "_*\\(QFeaturesGUI#")[[1]][[1]]
+        if (nchar(prefix)) out <- paste0(prefix, "_", out)
+    }
+    out
+}
+
 
 #' A function that will add the assays to the global_rv qfeatures object
 #'
 #' @param processed_qfeatures `QFeatures` object to add to the global_rv qfeatures object
 #' @param step_number `int` number of the step
+#' @param type A `character(1)` providing the name of the step.
+#' @param varFrom see [QFeatures::addAssayLink].
+#' @param varTo see [QFeatures::addAssayLink].
+#'
 #' @rdname INTERNAL_add_assays_to_global_rv
 #' @keywords internal
 #'
 #' @return (NULL) does not return anything but will add the assays to the global_rv qfeatures object
 #' @importFrom QFeatures addAssayLink
-
+#'
 add_assays_to_global_rv <- function(processed_qfeatures, step_number, type, varFrom = NULL, varTo = NULL) {
     for (name in names(processed_qfeatures)) {
-        new_name <- paste0(
-            strsplit(name, "_(QFeaturesGUI#", fixed = TRUE)[[1]][[1]],
-            "_(QFeaturesGUI#", step_number, ")",
-            "_", type, "_", step_number
-        )
-
+        new_name <- qfeaturesgui_name(type, step_number, name)
         global_rv$qfeatures[[new_name]] <- processed_qfeatures[[name]]
-
         if (is.null(varFrom) || is.null(varTo)) {
             global_rv$qfeatures <- addAssayLink(
                 global_rv$qfeatures,
@@ -363,6 +389,32 @@ add_assays_to_global_rv <- function(processed_qfeatures, step_number, type, varF
 }
 
 
+#' A function that will add the assays to the global_rv qfeatures
+#' object when performing a joining step, where multiple parent assays
+#' are linked to one child assay.
+#'
+#' @param processed_qfeatures `QFeatures` object to add to the global_rv qfeatures object
+#' @param step_number `int` number of the step
+#' @param type A `character(1)` providing the name of the step.
+#'
+#' @rdname INTERNAL_add_assays_to_global_rv
+#' @keywords internal
+#'
+#' @return (NULL) does not return anything but will add the assays to the global_rv qfeatures object
+#' @importFrom QFeatures addAssayLink
+#'
+add_joined_assay_to_global_rv <- function(processed_qfeatures, step_number, type) {
+    new_name <- qfeaturesgui_name(type, step_number)
+    global_rv$qfeatures[[new_name]] <- processed_qfeatures[[1]]
+    from_pattern <- paste0("QFeaturesGUI#", step_number - 1, "\\)")
+    from_names <- grep(from_pattern, names(global_rv$qfeatures), value = TRUE)
+    global_rv$qfeatures <- addAssayLink(
+        global_rv$qfeatures,
+        from = from_names,
+        to = new_name
+    )
+}
+
 #' A function that will logTransform all the assays of a qfeatures
 #' @param qfeatures `QFeatures` object to logTransform
 #' @param base `numeric` base of the log transformation
@@ -373,7 +425,6 @@ add_assays_to_global_rv <- function(processed_qfeatures, step_number, type, varF
 #' @importFrom QFeatures logTransform QFeatures
 #' @importFrom SummarizedExperiment colData
 #'
-
 log_transform_qfeatures <- function(qfeatures, base, pseudocount) {
     el <- lapply(names(qfeatures), function(name) {
         QFeatures::logTransform(
@@ -416,15 +467,14 @@ normalisation_qfeatures <- function(qfeatures, method) {
 #' @return `QFeatures` object with the normalised assays
 #' @rdname INTERNAL_aggregation_qfeatures
 #' @keywords internal
-#' @importFrom QFeatures normalize QFeatures
+#' @importFrom QFeatures normalize QFeatures aggregateFeatures
 #' @importFrom SummarizedExperiment colData
-
+#'
 aggregation_qfeatures <- function(qfeatures, method,
                                   fcol) {
     el <- lapply(names(qfeatures), function(name) {
-        QFeatures::aggregateFeatures(
+        aggregateFeatures(
             object = qfeatures[[name]],
-            #            fun = base::colMeans,
             fun = list(
                 robustSummary = MsCoreUtils::robustSummary,
                 medianPolish = MsCoreUtils::medianPolish,
@@ -439,6 +489,22 @@ aggregation_qfeatures <- function(qfeatures, method,
     QFeatures(el, colData = colData(qfeatures))
 }
 
+#' A function that will join all the assays of a qfeatures
+#'
+#' @param qfeatures `QFeatures` object to aggregate
+#'
+#' @return `QFeatures` object with the joined assays
+#'
+#' @rdname INTERNAL_aggregation_qfeatures
+#'
+#' @keywords internal
+#'
+#' @importFrom QFeatures joinAssays
+#'
+join_qfeatures <- function(qfeatures) {
+    qf <- joinAssays(qfeatures, names(qfeatures))
+    suppressMessages(suppressWarnings(qf[, , "joinedAssay"]))
+}
 
 #' A function that return a plot of the densities of intensities by sample
 #'
@@ -681,7 +747,6 @@ features_boxplot <- function(assays_df) {
 #' @importFrom plotly ggplotly
 #' @importFrom ggplot2 ggplot aes geom_boxplot
 #'
-
 unique_feature_boxplot <- function(assays_df, feature) {
     plot <- ggplot(assays_df[assays_df$feature_type == feature, , drop = FALSE], aes(x = sample_type, y = intensity, colour = sample_type)) +
         geom_boxplot()

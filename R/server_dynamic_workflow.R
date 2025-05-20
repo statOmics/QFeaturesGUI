@@ -54,6 +54,10 @@ server_dynamic_workflow <- function(input, output, session) {
                         interface_module_aggregation_tab(
                             paste0("aggregation_", i)
                         )
+                    } else if (global_rv$workflow_config[[i]] == "Assay joining") {
+                        interface_module_join_tab(
+                            paste0("join_", i)
+                        )
                     }
                 )
             })
@@ -81,6 +85,11 @@ server_dynamic_workflow <- function(input, output, session) {
             } else if (global_rv$workflow_config[[i]] == "Aggregation") {
                 server_module_aggregation_tab(
                     paste0("aggregation_", i),
+                    step_number=i
+                )
+            } else if (global_rv$workflow_config[[i]] == "Assay joining") {
+                server_module_join_tab(
+                    paste0("join_", i),
                     step_number=i
                 )
             }

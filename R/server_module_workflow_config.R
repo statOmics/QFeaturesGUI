@@ -43,7 +43,8 @@ server_module_workflow_config <- function(id) {
                                     "Features Filtering",
                                     "Log Transformation",
                                     "Normalisation",
-                                    "Aggregation"
+                                    "Aggregation",
+                                    "Assay joining"
                                 ),
                                 selected = selected,
                                 width = "90%"
