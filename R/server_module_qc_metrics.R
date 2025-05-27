@@ -90,7 +90,7 @@ server_module_pca_box <- function(id, single_assay, method, transpose) {
             stopifnot(is(single_assay(), "SummarizedExperiment"))
             updateSelectInput(session,
                 "pca_color",
-                choices = annotation_names()
+                choices = c("(none)", annotation_names())
             )
         })
 
@@ -98,10 +98,13 @@ server_module_pca_box <- function(id, single_assay, method, transpose) {
             req(single_assay())
             req(input$pca_color)
             if (id == "features") {
-                df <- rowData(single_assay())[, input$pca_color, drop = FALSE]
+                df <- rowData(single_assay())
             } else {
-                df <- colData(single_assay())[, input$pca_color, drop = FALSE]
+                df <- colData(single_assay())
             }
+            if (input$pca_color == "(none)")
+                return(data.frame(row.names = rownames(df)))
+            df <- df[, input$pca_color, drop = FALSE]
             if (is.character(df[, 1])) {
                 df[, 1] <- ifelse(nchar(df[, 1]) > input$color_width,
                     paste0(substr(df[, 1], 1, input$color_width), "..."), df[, 1]

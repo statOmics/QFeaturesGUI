@@ -263,26 +263,43 @@ page_assays_subset <- function(qfeatures, pattern) {
 #'
 pca_plotly <- function(df, pca_result, color_name, show_legend) {
     stopifnot(is.data.frame(df))
-    plotly <- plot_ly(df,
-                      x = ~PC1,
-                      y = ~PC2,
-                      color = as.formula(paste0("~", color_name)),
-                      text = ~Row.names,
-                      type = "scatter",
-                      mode = "markers",
-                      colors = if (is.numeric(df[[color_name]])) {
-                          viridisLite::viridis(10)
-                      } else {
-                          suppressWarnings(RColorBrewer::brewer.pal(
-                              length(unique(df[[color_name]])),
-                              "Set1"
-                          ))
-                      },
-                      hovertemplate = paste(
-                          "%{text}<br>",
-                          paste0(color_name, ": %{customdata}<extra></extra>")
-                      ),
-                      customdata = as.formula(paste0("~", color_name))
+    if (color_name == "(none)") {
+        color_name <- "color"
+        df[[color_name]] <- "none"
+    }
+    if (is.numeric(df[[color_name]])) {
+        color_scheme <- viridisLite::viridis(10)
+    } else {
+        if (length(unique(df[[color_name]])) <= 100) {
+            color_scheme <- suppressWarnings(RColorBrewer::brewer.pal(
+                length(unique(df[[color_name]])),
+                "Set1"
+            ))
+        } else {
+            warning(
+                "The categorical variable used to colour the PCA ",
+                "plot contains over 100 levels. Colouring is ",
+                "automatically disabled."
+            )
+            color_name <- "color"
+            df[[color_name]] <- "disabled"
+            color_scheme <- NULL
+        }
+    }
+    plotly <- plot_ly(
+        df,
+        x = ~PC1,
+        y = ~PC2,
+        color = as.formula(paste0("~", color_name)),
+        text = ~Row.names,
+        type = "scatter",
+        mode = "markers",
+        colors = color_scheme,
+        hovertemplate = paste(
+            "%{text}<br>",
+            paste0(color_name, ": %{customdata}<extra></extra>")
+        ),
+        customdata = as.formula(paste0("~", color_name))
     ) %>%
         layout(
             xaxis = list(title = paste(
