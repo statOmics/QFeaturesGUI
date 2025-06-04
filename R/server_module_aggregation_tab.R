@@ -37,7 +37,7 @@ server_module_aggregation_tab <- function(id, step_number) {
         })
 
 
-        processed_assays <- reactive({
+        processed_assays <- eventReactive(input$fcol, {
             req(assays_to_process())
             error_handler(
                 aggregation_qfeatures,
@@ -54,11 +54,6 @@ server_module_aggregation_tab <- function(id, step_number) {
                 qfeatures = processed_assays(),
                 color = input$color
             )
-            # error_handler(
-            #     density_by_sample_plotly,
-            #     component_name = "Density by sample plotly",
-            #     qfeatures = processed_assays(),
-            #     color = input$color)
         })
 
         observe({
