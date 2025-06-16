@@ -39,6 +39,7 @@ server_module_workflow_config <- function(id) {
                                 inputId = NS(id, paste0("step_", i)),
                                 label = paste0("Step ", i),
                                 choices = c(
+                                    "Add Annotations",
                                     "Samples Filtering",
                                     "Features Filtering",
                                     "Log Transformation",

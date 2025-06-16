@@ -34,7 +34,11 @@ server_dynamic_workflow <- function(input, output, session) {
             dynamic_tabs <- lapply(seq_along(global_rv$workflow_config), function(i) {
                 tabItem(
                     tabName = paste0("step_", i),
-                    if (global_rv$workflow_config[[i]] == "Samples Filtering") {
+                    if (global_rv$workflow_config[[i]] == "Add Annotations") {
+                        interface_module_create_annotation_tab(
+                            paste0("create_annotation_", i)
+                        )
+                    } else if (global_rv$workflow_config[[i]] == "Samples Filtering") {
                         interface_module_samples_filtering_tab(
                             paste0("samples_filtering_", i)
                         )
@@ -66,7 +70,12 @@ server_dynamic_workflow <- function(input, output, session) {
         })
 
         lapply(seq_along(global_rv$workflow_config), function(i) {
-            if (global_rv$workflow_config[[i]] == "Samples Filtering") {
+            if (global_rv$workflow_config[[i]] == "Add Annotations") {
+                server_module_create_annotation_tab(
+                    paste0("create_annotation_", i),
+                    step_number = i
+                )
+            } else if (global_rv$workflow_config[[i]] == "Samples Filtering") {
                 server_module_samples_filtering_tab(paste0("samples_filtering_", i),
                     step_number = i
                 )

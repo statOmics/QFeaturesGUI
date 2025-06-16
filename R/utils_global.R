@@ -798,3 +798,151 @@ annotation_cols <- function(x, what) {
         colnames(annot)
     }
 }
+
+annotate_qfeatures <- function(qfeatures, input) {
+    if (input$inconsistent) {
+        qfeatures <- spotInconsistentProteinInference(
+            object = qfeatures,
+            i = names(qfeatures),
+            proteinId = input$protein_id,
+            featureId = input$feature_id,
+            varName = input$inconsistent_varnam
+        )
+    }
+    if (input$one_hit_wonders) {
+        qfeatures <- spotOneHitWonders(
+            object = qfeatures,
+            i = names(qfeatures),
+            proteinId = input$protein_id,
+            featureId = input$feature_id,
+            varName = input$one_hit_wonders_varnam
+        )
+    }
+    if (input$one_run_wonders) {
+        qfeatures <- spotOneRunWonders(
+            object = qfeatures,
+            i = names(qfeatures),
+            proteinId = input$protein_id,
+            varName = input$one_run_wonders_varnam
+        )
+    }
+    if (input$duplicated) {
+        qfeatures <- spotDuplicatedPsms(
+            object = qfeatures,
+            i = names(qfeatures),
+            featureId = input$feature_id,
+            varName = input$duplicated_varnam
+        )
+        qfeatures <- rankDuplicatedPsms(
+            object = qfeatures,
+            i = names(qfeatures),
+            featureId = input$feature_id,
+            varName = input$duplicated_rank_varnam
+        )
+    }
+    if (input$missing_val) {
+        nna_res <- nNA(qfeatures, i = names(qfeatures))
+        nna_rows <- nna_res$nNArows
+        nna_cols <- nna_res$nNAcols
+        rowData(qfeatures) <- split(
+            data.frame(nna_rows[, c("pNA", "nNA")]), nna_rows$assay
+        )
+        colData(qfeatures)[nna_cols$name, c("pNA", "nNA")] <-
+            nna_cols[, c("pNA", "nNA")]
+    }
+    return(qfeatures)
+}
+
+prompt_useless_annotation <- function(step) {
+    showModal(modalDialog(
+        title = "Annotation disabled",
+        HTML(paste0(
+            "Annotating <b>", step, "</b> cannot be performed for a ",
+            "single run. If your data contains multiple runs, please ",
+            "perform this step before joining assays or start from ",
+            "the long format data (eg: MaxQuant's evindence file, ",
+            "DIANN's report file, Proteome Discoverer's psms file, etc"))
+    ))
+}
+
+#### Functions below are very experimental and should be integrated
+#### with QFeatures
+
+## Function to remove peptide ions that map to a different protein
+## depending on the run.
+##' @importFrom dplyr group_by mutate pull
+##' @importFrom QFeatures rbindRowData
+spotInconsistentProteinInference <- function(object, i,
+                                             featureId, proteinId,
+                                             varName = "isInconsistentProteinInference") {
+    i <- QFeatures:::.normIndex(object, i)
+    rd <- rbindRowData(object, i)
+    rd[[varName]] <- data.frame(rd) |>
+        group_by(.data[[featureId]]) |>
+        mutate(out = length(unique(.data[[featureId]])) > 1) |>
+        pull(out)
+    f <- rd$assay
+    rd <- rd[, -(1:2), drop = FALSE]
+    rowData(object) <- split(data.frame(rd), f)
+    object
+}
+
+spotOneHitWonders <- function(object, i, featureId, proteinId,
+                              varName = "isOneRunWonder") {
+    i <- QFeatures:::.normIndex(object, i)
+    rd <- rbindRowData(object, i)
+    mapping <- unique(rd[, c(featureId, proteinId)])
+    numberHits <- table(rd[[proteinId]])
+    oneHitWonders <- names(numberHits)[numberHits == 1]
+    rd[[varName]] <- rd[[proteinId]] %in% oneHitWonders
+    f <- rd$assay
+    rd <- rd[, -(1:2), drop = FALSE]
+    rowData(object) <- split(data.frame(rd), f)
+    object
+}
+
+spotOneRunWonders <- function(object, i, proteinId,
+                              varName = "isOneRunWonder") {
+    i <- QFeatures:::.normIndex(object, i)
+    rd <- rowData(object)[i]
+    proteins <- lapply(rd, function(x) unique(x[[proteinId]]))
+    idInNRuns <- table(unlist(proteins))
+    oneRunWonders <- names(idInNRuns)[idInNRuns == 1]
+    rd <- rbindRowData(object, i)
+    rd[[varName]] <- rd[[proteinId]] %in% oneRunWonders
+    f <- rd$assay
+    rd <- rd[, -(1:2), drop = FALSE]
+    rowData(object) <- split(data.frame(rd), f)
+    object
+}
+
+##' @importFrom Matrix rowSums
+##' @importFrom dplyr .data
+rankDuplicatedPsms <- function(object, i, featureId, varName = "duplicatedRank") {
+    i <- QFeatures:::.normIndex(object, i)
+    for (ii in i) {
+        rd <- rowData(object[[ii]])
+        rd$rowSums <- rowSums(assay(object[[ii]]), na.rm = TRUE)
+        rd[[varName]] <- data.frame(rd) |>
+            group_by(.data[[featureId]]) |>
+            mutate(out = rank(-rowSums)) |>
+            pull(out)
+        rowData(object[[ii]]) <- DataFrame(rd)
+    }
+    object
+}
+
+spotDuplicatedPsms <- function(object, i, featureId, varName = "isDuplicated") {
+    isDuplicated <- function(x) {
+        out <- duplicated(x)
+        out[x %in% x[out]] <- TRUE
+        out
+    }
+    i <- QFeatures:::.normIndex(object, i)
+    for (ii in i) {
+        rd <- rowData(object[[ii]])
+        rd[[varName]] <- isDuplicated(rd[[featureId]])
+        rowData(object[[ii]]) <- DataFrame(rd)
+    }
+    object
+}

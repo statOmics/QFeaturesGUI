@@ -51,9 +51,6 @@ box_readqfeatures_server <- function(id, input_table, sample_table) {
                     object = global_rv$qfeatures,
                     i = seq_along(global_rv$qfeatures)
                 )
-
-                for (i in seq_along(global_rv$qfeatures))
-                    rowData(global_rv$qfeatures[[i]])[,c("pNA", "nNA")] <- nNA(global_rv$qfeatures, i)$nNArows[, c("pNA", "nNA")]
             }
             if (input$singlecell) {
                 el <- ExperimentList(lapply(
