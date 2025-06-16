@@ -6,26 +6,37 @@
 
 # QFeaturesGUI
 
-`QFeaturesGUI` is a R package that contains a suite of shiny app to offer a graphical interface for the QFeatures package.
-Currently the package can be used to convert tables (csv and tsv) into a QFeatures object.
-This works for both bulk and single-cell data.
-The user can also apply several pre-processing steps to the imported QFeatures.
-This process is performed with the readQFeatures function from the QFeatures package.
+`QFeaturesGUI` is a R package that contains a suite of shiny app to
+offer a graphical interface for the QFeatures package. Currently the
+package can be used to convert tables (csv and tsv) into a QFeatures
+object. This works for both bulk and single-cell data. The user can
+also apply several pre-processing steps to the imported QFeatures.
+This process is performed with the readQFeatures function from the
+QFeatures package.
 
 ## Installation
 
-Get the package:
+Get the remotes packages to install from GitHub
 
 ```r
 # Check if remotes is installed. Otherwise install it.
 if (!require("remotes", quietly = TRUE)){
     install.packages("remotes")
 }
-# Install the package
-remotes::install_github("UCLouvain-CBIO/QFeaturesGUI",
+```
+
+Install the `QFeaturesGUI` package from the statOmics branch. **For the
+EBI course**, this is what you should run!
+
+```r
+remotes::install_github("statOmics/QFeaturesGUI",
     build_manual = TRUE,
     build_vignettes = TRUE
 )
-# Load the package
+```
+
+Load the package.
+
+```r
 library(QFeaturesGUI)
 ```
