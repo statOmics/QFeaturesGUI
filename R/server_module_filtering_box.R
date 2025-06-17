@@ -53,10 +53,12 @@ server_module_filtering_box <- function(id, assays_to_process, type, state) {
             req(input$annotation_selection)
             req(assays_to_process())
             if (type == "samples") {
-                colData(assays_to_process())[[input$annotation_selection]]
+                out <- colData(assays_to_process())[[input$annotation_selection]]
             } else if (type == "features") {
-                rowData(assays_to_process()[[1]])[[input$annotation_selection]]
+                out <- rowData(assays_to_process()[[1]])[[input$annotation_selection]]
             }
+            if (is.logical(out)) out <- as.integer(out)
+            out
         })
         clean_filter_value <- reactive({
             req(annotation_values())
