@@ -19,6 +19,19 @@ server_module_join_tab <- function(id, step_number) {
             )
         })
 
+        ## Setup available rowdata variable names for providing
+        ## fcol_join
+        rowdata_names <- reactive({
+            req(assays_to_process())
+            annotation_cols(assays_to_process(), "rowData")
+        })
+        observe({
+            updateSelectInput(
+                inputId = "fcol_join",
+                choices = c("(row names)", as.character(rowdata_names()))
+            )
+        })
+
         observeEvent(assays_to_process(), {
             output$rownames <- renderUI({
                 tags$div(
@@ -55,10 +68,17 @@ server_module_join_tab <- function(id, step_number) {
 
         processed_assays <- reactive({
             req(assays_to_process())
+            req(input$fcol_join)
+            if (input$fcol_join == "(row names)") {
+                fcol <- NULL
+            } else {
+                fcol <- input$fcol_join
+            }
             error_handler(
                 join_qfeatures,
                 component_name = "aggregation",
-                qfeatures = assays_to_process()
+                qfeatures = assays_to_process(),
+                fcol = fcol
             )
         })
 
@@ -72,6 +92,7 @@ server_module_join_tab <- function(id, step_number) {
                 add_joined_assay_to_global_rv,
                 component_name = "Add assays to global_rv",
                 processed_qfeatures = processed_assays(),
+                fcol = input$fcol_join,
                 step_number = step_number,
                 type = "join"
             )

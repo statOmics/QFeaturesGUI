@@ -420,16 +420,27 @@ add_assays_to_global_rv <- function(processed_qfeatures, step_number, type, varF
 #' @return (NULL) does not return anything but will add the assays to the global_rv qfeatures object
 #' @importFrom QFeatures addAssayLink
 #'
-add_joined_assay_to_global_rv <- function(processed_qfeatures, step_number, type) {
+add_joined_assay_to_global_rv <- function(processed_qfeatures, fcol, step_number, type) {
     new_name <- qfeaturesgui_name(type, step_number)
     global_rv$qfeatures[[new_name]] <- processed_qfeatures[[1]]
     from_pattern <- paste0("QFeaturesGUI#", step_number - 1, "\\)")
     from_names <- grep(from_pattern, names(global_rv$qfeatures), value = TRUE)
-    global_rv$qfeatures <- addAssayLink(
-        global_rv$qfeatures,
-        from = from_names,
-        to = new_name
-    )
+    if (fcol == "(row names)") {
+        global_rv$qfeatures <- addAssayLink(
+            global_rv$qfeatures,
+            from = from_names,
+            to = new_name
+        )
+    } else {
+        global_rv$qfeatures <- addAssayLink(
+            global_rv$qfeatures,
+            from = from_names,
+            to = new_name,
+            varFrom = rep(fcol, length(from_names)),
+            varTo = fcol
+        )
+    }
+
 }
 
 #' A function that will logTransform all the assays of a qfeatures
@@ -518,8 +529,8 @@ aggregation_qfeatures <- function(qfeatures, method,
 #'
 #' @importFrom QFeatures joinAssays
 #'
-join_qfeatures <- function(qfeatures) {
-    qf <- joinAssays(qfeatures, names(qfeatures))
+join_qfeatures <- function(qfeatures, fcol) {
+    qf <- joinAssays(qfeatures, names(qfeatures), fcol = fcol)
     suppressMessages(suppressWarnings(qf[, , "joinedAssay"]))
 }
 

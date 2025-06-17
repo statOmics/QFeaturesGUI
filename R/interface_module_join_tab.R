@@ -33,12 +33,18 @@ interface_module_join_tab <- function(id) {
             width = 12,
             solidHeader = TRUE,
             collapsible = FALSE,
-            p(paste0(
-                "You don't need to specify parameters when ",
-                "joining assays. Assays from the previous ",
-                "step will be automatically joined based on ",
-                "the rownames."
-            )),
+            p(
+                "Assays will be joined by combining common features ",
+                "across assays. Please specify how you want to define ",
+                "the feature identifier. This can either be based on ",
+                "the assay rownames or on an available feature ",
+                "annotation."
+            ),
+            selectInput(
+                inputId = NS(id, "fcol_join"),
+                label = "Annotation name",
+                choices = NULL
+            ),
             uiOutput(NS(id, "rownames"))
         ),
         actionButton(
