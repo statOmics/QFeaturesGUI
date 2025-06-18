@@ -89,7 +89,7 @@ box_readqfeatures_server <- function(id, input_table, sample_table) {
             error_handler(
                 qfeatures_to_df,
                 component_name = "qfeatures_to_df",
-                page_assays_subset(global_rv$qfeatures, "_(QFeaturesGUI#0)")
+                page_assays_subset(global_rv$qfeatures, 0)
             )
         })
 

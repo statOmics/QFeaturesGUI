@@ -8,7 +8,7 @@ server_module_create_annotation_tab <- function(id, step_number) {
             error_handler(page_assays_subset,
                           component_name = "Page assays subset",
                           qfeatures = global_rv$qfeatures,
-                          pattern = paste0("_(QFeaturesGUI#", step_number - 1, ")")
+                          step_number = step_number - 1
             )
         })
 

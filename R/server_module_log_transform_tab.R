@@ -11,10 +11,11 @@
 server_module_log_transform_tab <- function(id, step_number) {
     moduleServer(id, function(input, output, session) {
         assays_to_process <- eventReactive(input$reload, {
-            error_handler(page_assays_subset,
+            error_handler(
+                page_assays_subset,
                 component_name = "Page assays subset",
                 qfeatures = global_rv$qfeatures,
-                pattern = paste0("_(QFeaturesGUI#", step_number - 1, ")")
+                step_number = step_number - 1
             )
         })
 

@@ -226,7 +226,8 @@ pcaMethods_wrapper <- function(sce, method, center, scale, transpose = FALSE) {
 #' @rdname INTERNAL_page_assays_subset
 #' @keywords internal
 #'
-page_assays_subset <- function(qfeatures, pattern) {
+page_assays_subset <- function(qfeatures, step_number) {
+    pattern <- paste0("(QFeaturesGUI#", step_number, ")")
     to_process <- grep(
         pattern,
         names(qfeatures),
