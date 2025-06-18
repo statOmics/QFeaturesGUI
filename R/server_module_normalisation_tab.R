@@ -15,7 +15,7 @@ server_module_normalisation_tab <- function(id, step_number) {
                 page_assays_subset,
                 component_name = "Page assays subset",
                 qfeatures = global_rv$qfeatures,
-                step_number = step_number
+                step_number = step_number - 1
             )
         })
 
