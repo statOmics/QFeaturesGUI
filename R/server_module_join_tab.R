@@ -35,7 +35,7 @@ server_module_join_tab <- function(id, step_number) {
         observe({
             updateSelectInput(
                 inputId = "fcol2_join",
-                choices = as.character(rowdata_names())
+                choices = c("(none)", as.character(rowdata_names()))
             )
         })
 
@@ -84,7 +84,9 @@ server_module_join_tab <- function(id, step_number) {
         observeEvent(input$join, {
             req(assays_to_process())
             req(input$fcol_join)
+            req(input$fcol2_join)
             fcol2 <- input$fcol2_join
+            if (input$fcol2_join == "(none)") fcol2 <- NULL
             if (input$fcol_join == "(row names)") {
                 fcol <- fcol2 <- NULL
             } else {
