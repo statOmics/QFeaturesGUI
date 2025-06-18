@@ -45,6 +45,21 @@ interface_module_join_tab <- function(id) {
                 label = "Annotation name",
                 choices = NULL
             ),
+            p(
+                "You can provide a second annotation variable that ",
+                "will be pasted to the first annotation to generate ",
+                "the feature identifier."
+            ),
+            selectInput(
+                inputId = NS(id, "fcol2_join"),
+                label = "Second annotation name (optional)",
+                choices = NULL
+            ),
+            actionButton(
+                inputId = NS(id, "join"),
+                label = "Join assays",
+                class = "load-button"
+            ),
             uiOutput(NS(id, "rownames"))
         ),
         actionButton(

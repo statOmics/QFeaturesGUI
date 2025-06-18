@@ -527,9 +527,17 @@ aggregation_qfeatures <- function(qfeatures, method,
 #'
 #' @keywords internal
 #'
-#' @importFrom QFeatures joinAssays
+#' @importFrom QFeatures joinAssays createPrecursorId
 #'
-join_qfeatures <- function(qfeatures, fcol) {
+join_qfeatures <- function(qfeatures, fcol, fcol2 = NULL) {
+    if (!is.null(fcol2)) {
+        fcol_combined <- paste0(fcol, "_", fcol2)
+        qfeatures <- createPrecursorId(
+            qfeatures, name = fcol_combined,
+            fcols = c(fcol, fcol2)
+        )
+        fcol <- fcol_combined
+    }
     qf <- joinAssays(qfeatures, names(qfeatures), fcol = fcol)
     suppressMessages(suppressWarnings(qf[, , "joinedAssay"]))
 }

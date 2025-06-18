@@ -20,7 +20,7 @@ server_module_join_tab <- function(id, step_number) {
         })
 
         ## Setup available rowdata variable names for providing
-        ## fcol_join
+        ## fcol_join and fcol2_join
         rowdata_names <- reactive({
             req(assays_to_process())
             annotation_cols(assays_to_process(), "rowData")
@@ -28,58 +28,75 @@ server_module_join_tab <- function(id, step_number) {
         observe({
             updateSelectInput(
                 inputId = "fcol_join",
+                ## Also allow selecting rownames
                 choices = c("(row names)", as.character(rowdata_names()))
             )
         })
+        observe({
+            updateSelectInput(
+                inputId = "fcol2_join",
+                choices = as.character(rowdata_names())
+            )
+        })
 
+        ## Display available rownames
         observeEvent(assays_to_process(), {
             output$rownames <- renderUI({
-                tags$div(
-                    tags$h4("Assays to join"),
-                    tags$ul(
-                        style = "width: 100%; height: 100%; overflow: auto",
-                        lapply(seq_along(assays_to_process()), function(i) {
-                            tags$li(
-                                style = "font-size: 15px;",
-                                class = "list-element",
-                                tags$span(
-                                    style = "font-size: 15px",
-                                    names(assays_to_process())[i]
-                                ),
-                                tags$br(),
-                                tags$span(
-                                    style = "margin-left: 20px; font-size: 13px;",
-                                    paste(
-                                        "Rownames: ",
+                box(
+                    width = 12,
+                    height = "50%",
+                    p("If you want to join by row names, make sure the ",
+                      "the rownames below (partially) overlap:"),
+                    tags$div(
+                        tags$h4("Assays to join"),
+                        tags$ul(
+                            style = "width: 100%; height: 100%; overflow: auto",
+                            lapply(seq_along(assays_to_process()), function(i) {
+                                tags$li(
+                                    style = "font-size: 15px;",
+                                    class = "list-element",
+                                    tags$span(
+                                        style = "font-size: 15px",
+                                        names(assays_to_process())[i]
+                                    ),
+                                    tags$br(),
+                                    tags$span(
+                                        style = "margin-left: 20px; font-size: 13px;",
                                         paste(
-                                            head(rownames(assays_to_process())[[i]], 10),
-                                            collapse = ", "
-                                        ),
-                                        "[...]"
+                                            "Rownames: ",
+                                            paste(
+                                                head(rownames(assays_to_process())[[i]], 10),
+                                                collapse = ", "
+                                            ),
+                                            "[...]"
+                                        )
                                     )
                                 )
-                            )
-                        }),
-                        class = "list-group"
+                            }),
+                            class = "list-group"
+                        )
                     )
                 )
             })
         })
 
-        processed_assays <- reactive({
+        processed_assays <- reactiveVal()
+        observeEvent(input$join, {
             req(assays_to_process())
             req(input$fcol_join)
+            fcol2 <- input$fcol2_join
             if (input$fcol_join == "(row names)") {
-                fcol <- NULL
+                fcol <- fcol2 <- NULL
             } else {
                 fcol <- input$fcol_join
             }
-            error_handler(
+            processed_assays(error_handler(
                 join_qfeatures,
-                component_name = "aggregation",
+                component_name = "join",
                 qfeatures = assays_to_process(),
-                fcol = fcol
-            )
+                fcol = fcol,
+                fcol2 = fcol2
+            ))
         })
 
         observeEvent(input$export, {
