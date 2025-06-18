@@ -13,7 +13,7 @@ server_module_create_annotation_tab <- function(id, step_number) {
         })
 
         ## Setup available rowdata variable names for providing
-        ## feature_id and protein_id
+        ## feature_id and protein_id, and vars_to_combine
         rowdata_names <- reactive({
             req(assays_to_process())
             annotation_cols(assays_to_process(), "rowData")
@@ -27,6 +27,12 @@ server_module_create_annotation_tab <- function(id, step_number) {
         observe({
             updateSelectInput(
                 inputId = "protein_id",
+                choices = as.character(rowdata_names())
+            )
+        })
+        observe({
+            updateSelectInput(
+                inputId = "vars_to_combine",
                 choices = as.character(rowdata_names())
             )
         })

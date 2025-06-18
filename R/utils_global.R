@@ -820,6 +820,16 @@ annotation_cols <- function(x, what) {
 }
 
 annotate_qfeatures <- function(qfeatures, input) {
+    if (input$combine_annot) {
+        if (length(input$vars_to_combine) > 0) {
+            qfeatures <- createRowDataVariable(
+                object = qfeatures,
+                i = names(qfeatures),
+                vars = input$vars_to_combine,
+                varName = input$combine_varnam
+            )
+        }
+    }
     if (input$inconsistent) {
         qfeatures <- spotInconsistentProteinInference(
             object = qfeatures,
@@ -870,7 +880,7 @@ annotate_qfeatures <- function(qfeatures, input) {
         colData(qfeatures)[nna_cols$name, c("pNA", "nNA")] <-
             nna_cols[, c("pNA", "nNA")]
     }
-    return(qfeatures)
+    qfeatures
 }
 
 prompt_useless_annotation <- function(step) {
@@ -887,6 +897,20 @@ prompt_useless_annotation <- function(step) {
 
 #### Functions below are very experimental and should be integrated
 #### with QFeatures
+
+
+createRowDataVariable <- function(object, i, vars,
+                                  varName = "featureID",
+                                  sep = "_") {
+    i <- QFeatures:::.normIndex(object, i)
+    rd <- rbindRowData(object, i)
+    args <- c(as.list(rd[, vars, drop = FALSE]), list(sep = sep))
+    rd[[varName]] <- do.call(paste, args)
+    f <- rd$assay
+    rd <- rd[, -(1:2), drop = FALSE]
+    rowData(object) <- split(data.frame(rd), f)
+    object
+}
 
 ## Function to remove peptide ions that map to a different protein
 ## depending on the run.

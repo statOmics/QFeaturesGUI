@@ -42,6 +42,32 @@ interface_module_create_annotation_tab <- function(id) {
                 solidHeader = TRUE,
                 collapsible = FALSE,
                 style = "min-height: 200px;",
+                ## Check box for combining annotations
+                checkboxInput(
+                    inputId = NS(id, "combine_annot"),
+                    label = "Combine multiple annotations"
+                ),
+                p("Check this box to create an new feature annotation ",
+                  "that is the combination of other feature ",
+                  "annotations. This is particularly useful for ",
+                  "creating a unique feature identifier.",
+                ),
+                selectInput(
+                    inputId = NS(id, "vars_to_combine"),
+                    label = NULL,
+                    choices = NULL,
+                    multiple = TRUE,
+                    width = "100%"
+                ),
+                p(
+                    "The annotation is stored in the column name below:"
+                ),
+                textInput(
+                    inputId = NS(id, "combine_varnam"),
+                    label = NULL,
+                    value = "featureID",
+                    width = "50%"
+                ),
                 ## Check box for inconsistent inference
                 checkboxInput(
                     inputId = NS(id, "inconsistent"),
