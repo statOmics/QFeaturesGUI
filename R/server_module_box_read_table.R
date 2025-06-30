@@ -35,6 +35,10 @@ box_read_table_server <- function(id, given_table = NULL) {
                     #header = TRUE,
                     #row.names = 1
                 )
+                if (exists("new_table"))
+                  for (i in which(
+                    sapply(new_table,class) == "integer64")
+                    ) new_table[[i]] <- as.numeric(new_table[[i]])
                 removeModal()
                 table(new_table)
             }
